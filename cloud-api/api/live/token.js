@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       return json(res, 400, { error: 'roomName, identity and role are required.' });
     }
     const roomService = new RoomServiceClient(LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
-    const participants = await roomService.listParticipants(roomName);
+    let participants = []; try { participants = await roomService.listParticipants(roomName); } catch (e) { if (role !== "host") throw e; }
     const existing = participants.find(p => p.identity === identity);
     const host = participants.find(p => {
       try { return JSON.parse(p.metadata || '{}').role === 'host'; } catch { return p.identity.startsWith('host-'); }
