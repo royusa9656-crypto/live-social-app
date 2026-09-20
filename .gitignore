@@ -1,1 +1,8 @@
 node_modules/
+
+# Environment secrets
+.env
+cloud-api/.env
+
+# Build output
+dist/
