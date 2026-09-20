@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SfuLiveRoom from '../components/SfuLiveRoom';
 import {
   View,
   Text,
@@ -47,6 +48,7 @@ const FEED = [
 export default function Home() {
   const [tab, setTab] = useState<'following' | 'foryou'>('foryou');
   const [liked, setLiked] = useState<string | null>(null);
+  const [showLive, setShowLive] = useState(false);
 
   const renderItem = ({ item }: any) => (
     <View style={[styles.video, { backgroundColor: item.gradient }]}>
@@ -146,7 +148,7 @@ export default function Home() {
           </View>
         </Pressable>
 
-        <Pressable style={styles.navItem}>
+        <Pressable style={styles.navItem} onPress={() => setShowLive(true)}>
           <Text style={styles.navIcon}>LIVE</Text>
           <Text style={styles.navText}>Live</Text>
         </Pressable>
@@ -158,6 +160,17 @@ export default function Home() {
       </View>
     </View>
   );
+
+  if (showLive) {
+    return (
+      <SfuLiveRoom
+        roomName="demo-room"
+        identity={`viewer-${Math.floor(Math.random() * 10000)}`}
+        role="guest"
+        onClose={() => setShowLive(false)}
+      />
+    );
+  }
 
   return (
     <View style={styles.root}>
