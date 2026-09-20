@@ -16,7 +16,7 @@ async function getUser(req) {
 }
 
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
@@ -27,42 +27,23 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid or expired session.' });
     }
 
-    const { invite_id, status } = req.body || {};
-
-    if (!invite_id || !['accepted', 'rejected'].includes(status)) {
-      return res.status(400).json({
-        error: 'invite_id and status (accepted/rejected) are required.'
-      });
-    }
-
     const { data, error } = await supabase
       .from('live_invites')
-      .update({
-        status,
-        responded_at: new Date().toISOString()
-      })
-      .eq('id', String(invite_id))
+      .select('id, room_name, inviter_id, invitee_id, status, created_at')
       .eq('invitee_id', user.id)
       .eq('status', 'pending')
-      .select('id, room_name, inviter_id, invitee_id, status, created_at, responded_at')
-      .maybeSingle();
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    if (!data) {
-      return res.status(404).json({
-        error: 'Invitation not found or already responded to.'
-      });
-    }
-
     return res.status(200).json({
       ok: true,
-      invite: data
+      invites: data || []
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: 'Could not respond to live invitation.'
+      error: 'Could not load pending invitations.'
     });
   }
 };
