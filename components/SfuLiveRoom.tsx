@@ -4,7 +4,7 @@ import { AudioSession, LiveKitRoom, useTracks, VideoTrack, useLocalParticipant, 
 import { Track } from 'livekit-client';
 import { fetchLiveKitToken } from '../services/livekit';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8788';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://live-social-app-five.vercel.app';
 const LIVEKIT_URL = process.env.EXPO_PUBLIC_LIVEKIT_URL || '';
 
 export default function SfuLiveRoom({ roomName, identity, role, onClose }: { roomName:string; identity:string; role:'host'|'guest'; onClose:()=>void }) {
