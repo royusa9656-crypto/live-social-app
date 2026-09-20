@@ -1,5 +1,4 @@
-const { AccessToken, RoomServiceClient } = require('@livekit/server-sdk');
-
+const { AccessToken, RoomServiceClient } = require('livekit-server-sdk');
 function json(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   return res.end(JSON.stringify(body));
