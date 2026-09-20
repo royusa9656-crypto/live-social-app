@@ -165,8 +165,8 @@ export default function Home() {
     return (
       <SfuLiveRoom
         roomName="demo-room"
-        identity={`viewer-${Math.floor(Math.random() * 10000)}`}
-        role="guest"
+        identity={`host-${Math.floor(Math.random() * 10000)}`}
+        role="host"
         onClose={() => setShowLive(false)}
       />
     );
