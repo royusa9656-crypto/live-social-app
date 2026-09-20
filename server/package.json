@@ -1,0 +1,8 @@
+{
+  "name": "live-social-api",
+  "private": true,
+  "version": "0.5.0",
+  "main": "index.js",
+  "scripts": {"start": "node index.js"},
+  "dependencies": {"cors": "^2.8.5", "express": "^4.21.2", "livekit-server-sdk": "^2.9.0"}
+}

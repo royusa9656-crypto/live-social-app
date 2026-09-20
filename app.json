@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Live Social",
+    "slug": "live-social-app",
+    "version": "0.5.0",
+    "orientation": "portrait",
+    "scheme": "livesocial",
+    "plugins": [
+      "expo-router",
+      "expo-camera",
+      "expo-av",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc"
+    ],
+    "android": {
+      "package": "com.livesocial.app",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.example.livesocial",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Live Social to use your camera for live streaming.",
+        "NSMicrophoneUsageDescription": "Allow Live Social to use your microphone for live streaming."
+      }
+    }
+  }
+}

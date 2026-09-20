@@ -1,0 +1,8 @@
+{
+  "name": "live-social-cloud-api",
+  "private": true,
+  "version": "0.7.0",
+  "dependencies": {
+    "@livekit/server-sdk": "^2.15.0"
+  }
+}
