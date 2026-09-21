@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, PermissionsAndroid, Platform } from 'react-native';
 import { AudioSession, LiveKitRoom, useTracks, VideoTrack, useLocalParticipant, useRoomContext } from '@livekit/react-native';
 import { Track } from 'livekit-client';
 import { fetchLiveKitToken } from '../services/livekit';
@@ -13,13 +13,59 @@ export default function SfuLiveRoom({ roomName, identity, role, onClose }: { roo
   const [error, setError] = useState('');
 
   useEffect(() => {
-    AudioSession.startAudioSession();
-    let mounted = true;
-    fetchLiveKitToken(API_BASE_URL, roomName, identity, role)
-      .then(data => { if (mounted) { setToken(data.token); setWsUrl(data.wsUrl); } })
-      .catch(e => mounted && setError(e?.message || 'Could not get live room token.'));
-    return () => { mounted = false; AudioSession.stopAudioSession(); };
-  }, [roomName, identity, role]);
+  let mounted = true;
+
+  const setupMedia = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const permissions = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+
+        const cameraGranted =
+          permissions[PermissionsAndroid.PERMISSIONS.CAMERA] ===
+          PermissionsAndroid.RESULTS.GRANTED;
+
+        const micGranted =
+          permissions[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] ===
+          PermissionsAndroid.RESULTS.GRANTED;
+
+        if (!cameraGranted || !micGranted) {
+          if (mounted) {
+            setError('Camera and microphone permissions are required for LIVE.');
+          }
+          return;
+        }
+      }
+
+      await AudioSession.startAudioSession();
+
+      const data = await fetchLiveKitToken(
+        API_BASE_URL,
+        roomName,
+        identity,
+        role
+      );
+
+      if (mounted) {
+        setToken(data.token);
+        setWsUrl(data.wsUrl);
+      }
+    } catch (e: any) {
+      if (mounted) {
+        setError(e?.message || 'Could not start camera/microphone.');
+      }
+    }
+  };
+
+  setupMedia();
+
+  return () => {
+    mounted = false;
+    AudioSession.stopAudioSession();
+  };
+}, [roomName, identity, role]);
 
   if (error) return <View style={styles.center}><Text style={styles.error}>{error}</Text><Pressable onPress={onClose} style={styles.button}><Text style={styles.buttonText}>Back</Text></Pressable></View>;
   if (!token || !wsUrl) return <View style={styles.center}><Text style={styles.loading}>Connecting to live room…</Text></View>;
