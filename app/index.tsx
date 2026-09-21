@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../services/supabase';
 import SfuLiveRoom from '../components/SfuLiveRoom';
+
 import {
   View,
   Text,
