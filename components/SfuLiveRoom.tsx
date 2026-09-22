@@ -315,6 +315,17 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
           </ScrollView>
 
           <Text style={styles.coinBalance}>🪙 Test Coins: {testCoins.toLocaleString()}</Text>
+          <View style={styles.testCoinControls}>
+            <Pressable style={styles.testCoinButton} onPress={() => setTestCoins(v => v + 1000)}>
+              <Text style={styles.testCoinButtonText}>+1K</Text>
+            </Pressable>
+            <Pressable style={styles.testCoinButton} onPress={() => setTestCoins(v => v + 10000)}>
+              <Text style={styles.testCoinButtonText}>+10K</Text>
+            </Pressable>
+            <Pressable style={styles.testCoinButton} onPress={() => setTestCoins(1250)}>
+              <Text style={styles.testCoinButtonText}>RESET</Text>
+            </Pressable>
+          </View>
 
           <View style={styles.giftGrid}>
             {giftCatalog.filter(gift => gift.category === giftCategory).map(gift => {
@@ -483,7 +494,10 @@ targetScroll:{marginBottom:12},
 targetChip:{borderWidth:1,borderColor:'#292932',borderRadius:20,paddingHorizontal:15,paddingVertical:9,marginRight:8,backgroundColor:'#17171d'},
 targetChipActive:{borderColor:'#ff2d72',backgroundColor:'rgba(255,45,114,0.16)'},
 targetChipText:{color:'#fff',fontSize:11,fontWeight:'800'},
-coinBalance:{color:'#ffe08a',fontSize:13,fontWeight:'900',marginBottom:14,backgroundColor:'#17171d',borderWidth:1,borderColor:'rgba(255,215,106,0.18)',paddingHorizontal:14,paddingVertical:10,borderRadius:20},
+coinBalance:{color:'#ffe08a',fontSize:13,fontWeight:'900',marginBottom:10,backgroundColor:'#17171d',borderWidth:1,borderColor:'rgba(255,215,106,0.18)',paddingHorizontal:14,paddingVertical:10,borderRadius:20},
+testCoinControls:{flexDirection:'row',gap:8,marginBottom:14},
+testCoinButton:{paddingHorizontal:14,paddingVertical:7,borderRadius:16,backgroundColor:'#24242d',borderWidth:1,borderColor:'rgba(255,215,106,0.3)'},
+testCoinButtonText:{color:'#ffe08a',fontSize:12,fontWeight:'900'},
 giftGrid:{flexDirection:'row',flexWrap:'wrap',gap:9},
 giftCard:{width:'31.5%',backgroundColor:'#15151b',borderRadius:19,padding:13,alignItems:'center',justifyContent:'center',borderWidth:1,borderColor:'#25252d',minHeight:126},
 giftDisabled:{opacity:0.35},
