@@ -51,18 +51,19 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     name: string;
     price: number;
     icon: string;
-    rarity: string;
+    rarity: string; category: string;
   };
 
   const giftCatalog: Gift[] = [
-    { id: 'rose', name: 'Rose', price: 1, icon: '🌹', rarity: 'Common' },
-    { id: 'heart', name: 'Heart', price: 5, icon: '💗', rarity: 'Common' },
-    { id: 'crown', name: 'Crown', price: 500, icon: '👑', rarity: 'Epic' },
-    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary' },
-    { id: 'dragon', name: 'Dragon', price: 2500, icon: '🐉', rarity: 'Legendary' },
-    { id: 'universe', name: 'Universe', price: 10000, icon: '🌌', rarity: 'Ultra' },
+    { id: 'rose', name: 'Rose', price: 1, icon: '🌹', rarity: 'Common', category: 'Popular' },
+    { id: 'heart', name: 'Heart', price: 5, icon: '💗', rarity: 'Common', category: 'Popular' },
+    { id: 'crown', name: 'Crown', price: 500, icon: '👑', rarity: 'Epic', category: 'Royal' },
+    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary' },
+    { id: 'dragon', name: 'Dragon', price: 2500, icon: '🐉', rarity: 'Legendary', category: 'Legendary' },
+    { id: 'universe', name: 'Universe', price: 10000, icon: '🌌', rarity: 'Ultra', category: 'Ultra' },
   ];
 
+  const [giftCategory, setGiftCategory] = useState('Popular');
   const [giftOpen, setGiftOpen] = useState(false);
   const [giftTarget, setGiftTarget] = useState('HOST');
   const [testCoins, setTestCoins] = useState(1250);
@@ -265,6 +266,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     <Modal visible={giftOpen} transparent animationType="slide" onRequestClose={() => setGiftOpen(false)}>
       <View style={styles.giftModal}>
         <View style={styles.giftPanel}>
+          <View style={styles.giftGrabber} />
           <View style={styles.giftHeader}>
             <View>
               <Text style={styles.giftHeaderTitle}>Send Gift 🎁</Text>
@@ -275,6 +277,13 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
             </Pressable>
           </View>
 
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={styles.categoryContent}>
+            {['Popular', 'Royal', 'Legendary', 'Ultra'].map(category => (
+              <Pressable key={category} onPress={() => setGiftCategory(category)} style={[styles.categoryChip, giftCategory === category && styles.categoryChipActive]}>
+                <Text style={[styles.categoryChipText, giftCategory === category && styles.categoryChipTextActive]}>{category}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.targetScroll}>
             {['HOST', ...participants.map(p => p.identity)].map(target => (
               <Pressable
@@ -293,7 +302,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
           <Text style={styles.coinBalance}>🪙 Test Coins: {testCoins.toLocaleString()}</Text>
 
           <View style={styles.giftGrid}>
-            {giftCatalog.map(gift => {
+            {giftCatalog.filter(gift => gift.category === giftCategory).map(gift => {
               const disabled = testCoins < gift.price;
 
               return (
@@ -336,10 +345,10 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                     }, 4200);
                   }}
                 >
-                  <Text style={styles.giftIcon}>{gift.icon}</Text>
+                  {gift.id === 'lion' ? <Image source={require('../assets/lion-gift-preview.png')} style={styles.giftThumbnail} resizeMode='cover' /> : <Text style={styles.giftIcon}>{gift.icon}</Text>}
                   <Text style={styles.giftName}>{gift.name}</Text>
                   <Text style={styles.giftPrice}>{gift.price.toLocaleString()} coins</Text>
-                  <Text style={styles.giftRarity}>{gift.rarity}</Text>
+                  <Text style={[styles.giftRarity, gift.rarity === 'Common' && styles.rarityCommon, gift.rarity === 'Epic' && styles.rarityEpic, gift.rarity === 'Legendary' && styles.rarityLegendary, gift.rarity === 'Ultra' && styles.rarityUltra]}>{gift.rarity}</Text>
                 </Pressable>
               );
             })}
@@ -444,23 +453,27 @@ giftControl:{paddingHorizontal:14,paddingVertical:9,borderRadius:22,backgroundCo
 giftControlIcon:{fontSize:18},
 giftControlText:{color:'#fff',fontWeight:'800',fontSize:10,marginTop:1},
 giftModal:{flex:1,backgroundColor:'rgba(0,0,0,0.55)',justifyContent:'flex-end'},
-giftPanel:{backgroundColor:'#111',borderTopLeftRadius:24,borderTopRightRadius:24,padding:18,paddingBottom:30,maxHeight:'75%'},
+giftPanel:{backgroundColor:'#0d0d12',borderTopLeftRadius:28,borderTopRightRadius:28,padding:18,paddingBottom:30,maxHeight:'75%'},
+giftGrabber:{width:42,height:4,borderRadius:4,backgroundColor:'#555',alignSelf:'center',marginBottom:14},
 giftHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:12},
-giftHeaderTitle:{color:'#fff',fontSize:21,fontWeight:'900'},
+giftHeaderTitle:{color:'#fff',fontSize:23,fontWeight:'900',letterSpacing:0.2},
 giftHeaderSub:{color:'#888',fontSize:12,marginTop:3},
-giftClose:{color:'#fff',fontSize:30},
+giftClose:{color:'#fff',fontSize:26,width:38,height:38,borderRadius:19,backgroundColor:'#1c1c22',textAlign:'center',lineHeight:35},
+categoryScroll:{marginBottom:10},categoryContent:{paddingRight:8},categoryChip:{paddingHorizontal:15,paddingVertical:9,borderRadius:19,backgroundColor:'#17171d',borderWidth:1,borderColor:'#292932',marginRight:8},categoryChipActive:{backgroundColor:'#ff2d72',borderColor:'#ff2d72'},categoryChipText:{color:'#9999a5',fontSize:11,fontWeight:'800'},categoryChipTextActive:{color:'#fff'},
 targetScroll:{marginBottom:12},
-targetChip:{borderWidth:1,borderColor:'#333',borderRadius:18,paddingHorizontal:14,paddingVertical:8,marginRight:8},
-targetChipActive:{borderColor:'#ff2d72',backgroundColor:'#241019'},
+targetChip:{borderWidth:1,borderColor:'#292932',borderRadius:20,paddingHorizontal:15,paddingVertical:9,marginRight:8,backgroundColor:'#17171d'},
+targetChipActive:{borderColor:'#ff2d72',backgroundColor:'rgba(255,45,114,0.16)'},
 targetChipText:{color:'#fff',fontSize:11,fontWeight:'800'},
-coinBalance:{color:'#ffd76a',fontSize:14,fontWeight:'800',marginBottom:12},
+coinBalance:{color:'#ffe08a',fontSize:13,fontWeight:'900',marginBottom:14,backgroundColor:'#17171d',borderWidth:1,borderColor:'rgba(255,215,106,0.18)',paddingHorizontal:14,paddingVertical:10,borderRadius:20},
 giftGrid:{flexDirection:'row',flexWrap:'wrap',gap:9},
-giftCard:{width:'31.5%',backgroundColor:'#1b1b1b',borderRadius:15,padding:11,alignItems:'center',borderWidth:1,borderColor:'#292929'},
+giftCard:{width:'31.5%',backgroundColor:'#15151b',borderRadius:19,padding:13,alignItems:'center',justifyContent:'center',borderWidth:1,borderColor:'#25252d',minHeight:126},
 giftDisabled:{opacity:0.35},
-giftIcon:{fontSize:32},
+giftThumbnail:{width:64,height:82,borderRadius:14,marginBottom:3},
+giftIcon:{fontSize:40},
 giftName:{color:'#fff',fontSize:13,fontWeight:'800',marginTop:4},
-giftPrice:{color:'#aaa',fontSize:10,marginTop:3},
-giftRarity:{color:'#ffd76a',fontSize:9,marginTop:3,fontWeight:'700'},
+giftPrice:{color:'#ffe08a',fontSize:10,fontWeight:'900',marginTop:6},
+giftRarity:{color:'#8f8f9a',fontSize:8,fontWeight:'800',marginTop:4,textTransform:'uppercase'},
+rarityCommon:{color:'#a7a7b0'},rarityEpic:{color:'#c084fc'},rarityLegendary:{color:'#ffd76a'},rarityUltra:{color:'#ff6bdf'},
 giftOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,zIndex:50,alignItems:'center',justifyContent:'center'},
 giftBanner:{position:'absolute',top:72,left:16,right:16,minHeight:56,borderRadius:30,backgroundColor:'rgba(20,12,5,0.94)',borderWidth:1,borderColor:'#f4bd4f',alignItems:'center',justifyContent:'center',paddingHorizontal:16},
 giftBannerText:{color:'#fff',fontSize:15,fontWeight:'800'},
