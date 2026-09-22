@@ -482,7 +482,7 @@ rarityCommon:{color:'#a7a7b0'},rarityEpic:{color:'#c084fc'},rarityLegendary:{col
 giftOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,zIndex:50,alignItems:'center',justifyContent:'center'},
 giftBanner:{position:'absolute',top:72,left:16,right:16,minHeight:56,borderRadius:30,backgroundColor:'rgba(20,12,5,0.94)',borderWidth:1,borderColor:'#f4bd4f',alignItems:'center',justifyContent:'center',paddingHorizontal:16},
 giftBannerText:{color:'#fff',fontSize:15,fontWeight:'800'},
-lionStage:{width:'94%',height:'62%',borderRadius:28,overflow:'hidden',borderWidth:1,borderColor:'rgba(255,215,106,0.55)',backgroundColor:'#111'},
+lionStage:{width:'62%',height:'42%',borderRadius:24,overflow:'hidden',borderWidth:1,borderColor:'rgba(255,215,106,0.55)',backgroundColor:'#111'},
 lionImage:{width:'100%',height:'100%'},
 genericGiftStage:{width:'82%',height:'48%',borderRadius:30,backgroundColor:'rgba(32,22,10,0.96)',borderWidth:1,borderColor:'#d5a83c',alignItems:'center',justifyContent:'center'},
 genericGiftIcon:{fontSize:105},
