@@ -392,11 +392,19 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
         </View>
 
         {activeGift.video ? (
-          <Animated.View style={[styles.lionStage, { transform: [{ scale: giftScale }] }]}>
+          <Animated.View
+            style={[
+              styles.lionStage,
+              {
+                opacity: giftOpacity,
+                transform: [{ scale: giftScale }],
+              },
+            ]}
+          >
             <Video
               source={activeGift.video}
               style={styles.lionImage}
-              resizeMode={ResizeMode.COVER}
+              resizeMode={ResizeMode.CONTAIN}
               shouldPlay
               isLooping={false}
               isMuted={false}
@@ -404,17 +412,23 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
             />
           </Animated.View>
         ) : (
-          <Animated.View style={[styles.genericGiftStage, { transform: [{ scale: giftScale }] }]}>
+          <Animated.View
+            style={[
+              styles.genericGiftStage,
+              {
+                transform: [{ scale: giftScale }],
+              },
+            ]}
+          >
             <Text style={styles.genericGiftIcon}>{activeGift.icon}</Text>
-            <Text style={styles.genericGiftTitle}>{activeGift.name.toUpperCase()}</Text>
-            <Text style={styles.genericGiftSub}>{activeGift.rarity} Gift</Text>
+            <Text style={styles.genericGiftTitle}>
+              {activeGift.name.toUpperCase()}
+            </Text>
+            <Text style={styles.genericGiftSub}>
+              {activeGift.rarity} Gift
+            </Text>
           </Animated.View>
         )}
-
-        <View style={styles.giftCaption}>
-          <Text style={styles.giftTitle}>{activeGift.name === 'Lion' ? 'LEGENDARY LION' : activeGift.name.toUpperCase()}</Text>
-          <Text style={styles.giftSub}>Sent to {giftTarget} · {giftCombo} combo</Text>
-        </View>
       </Animated.View>
     )}
   </View>;
@@ -508,10 +522,10 @@ giftPrice:{color:'#ffe08a',fontSize:10,fontWeight:'900',marginTop:6},
 giftRarity:{color:'#8f8f9a',fontSize:8,fontWeight:'800',marginTop:4,textTransform:'uppercase'},
 rarityCommon:{color:'#a7a7b0'},rarityEpic:{color:'#c084fc'},rarityLegendary:{color:'#ffd76a'},rarityUltra:{color:'#ff6bdf'},
 giftOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,zIndex:50,alignItems:'center',justifyContent:'center'},
-giftBanner:{position:'absolute',top:72,left:16,right:16,minHeight:56,borderRadius:30,backgroundColor:'rgba(20,12,5,0.94)',borderWidth:1,borderColor:'#f4bd4f',alignItems:'center',justifyContent:'center',paddingHorizontal:16},
-giftBannerText:{color:'#fff',fontSize:15,fontWeight:'800'},
-lionStage:{width:'48%',height:'58%',borderRadius:30,overflow:'hidden',borderWidth:1,borderColor:'rgba(255,215,106,0.65)',backgroundColor:'transparent',shadowColor:'#f7b942',shadowOpacity:0.65,shadowRadius:24,marginTop:70},
-lionImage:{width:'100%',height:'100%'},
+giftBanner:{position:'absolute',top:72,left:28,right:28,minHeight:44,borderRadius:22,backgroundColor:'rgba(12,12,16,0.78)',borderWidth:1,borderColor:'rgba(255,215,106,0.45)',alignItems:'center',justifyContent:'center',paddingHorizontal:16,zIndex:5},
+giftBannerText:{color:'#fff',fontSize:14,fontWeight:'800',letterSpacing:0.15},
+lionStage:{position:'absolute',left:0,right:0,top:70,bottom:95,alignItems:'center',justifyContent:'center',backgroundColor:'transparent',zIndex:2},
+lionImage:{width:'100%',height:'100%',transform:[{scale:1.08}]},
 genericGiftStage:{width:'82%',height:'48%',borderRadius:30,backgroundColor:'rgba(32,22,10,0.96)',borderWidth:1,borderColor:'#d5a83c',alignItems:'center',justifyContent:'center'},
 genericGiftIcon:{fontSize:105},
 genericGiftTitle:{color:'#ffe08a',fontSize:28,fontWeight:'900',letterSpacing:2,marginTop:12},
