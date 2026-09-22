@@ -52,16 +52,30 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     name: string;
     price: number;
     icon: string;
-    rarity: string; category: string;
+    rarity: string;
+    category: string;
+    video?: any;
+    duration?: number;
   };
 
   const giftCatalog: Gift[] = [
     { id: 'rose', name: 'Rose', price: 1, icon: '🌹', rarity: 'Common', category: 'Popular' },
     { id: 'heart', name: 'Heart', price: 5, icon: '💗', rarity: 'Common', category: 'Popular' },
     { id: 'crown', name: 'Crown', price: 500, icon: '👑', rarity: 'Epic', category: 'Royal' },
-    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary' },
+    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary', video: require('../assets/lion-gift.mp4'), duration: 8000 },
     { id: 'dragon', name: 'Dragon', price: 2500, icon: '🐉', rarity: 'Legendary', category: 'Legendary' },
     { id: 'universe', name: 'Universe', price: 10000, icon: '🌌', rarity: 'Ultra', category: 'Ultra' },
+
+    { id: 'desert-drifting', name: 'Desert Drifting', price: 500, icon: '🏜️', rarity: 'Epic', category: 'Action', video: require('../assets/desert-drifting-gift.mp4'), duration: 8000 },
+    { id: 'golden-falcon', name: 'Golden Falcon', price: 750, icon: '🦅', rarity: 'Epic', category: 'Animals', video: require('../assets/golden-falcon-gift.mp4'), duration: 8000 },
+    { id: 'feature-city', name: 'Feature City', price: 1000, icon: '🌆', rarity: 'Legendary', category: 'Luxury', video: require('../assets/feature-city-gift.mp4'), duration: 8000 },
+    { id: 'flying-falcon', name: 'Flying Falcon', price: 1000, icon: '🦅', rarity: 'Legendary', category: 'Animals', video: require('../assets/flying-falcon-gift.mp4'), duration: 8000 },
+    { id: 'flying-jets', name: 'Flying Jets', price: 1500, icon: '✈️', rarity: 'Legendary', category: 'Action', video: require('../assets/flying-jets-gift.mp4'), duration: 8000 },
+    { id: 'lion-leon', name: 'Lion & Leon', price: 2000, icon: '🦁', rarity: 'Legendary', category: 'Animals', video: require('../assets/lion-leon-gift.mp4'), duration: 8000 },
+    { id: 'space-rocket', name: 'Space Rocket', price: 1000, icon: '🚀', rarity: 'Legendary', category: 'Space', video: require('../assets/space-rocket-gift.mp4'), duration: 8000 },
+    { id: 'white-tiger', name: 'White Tiger', price: 2000, icon: '🐯', rarity: 'Legendary', category: 'Animals', video: require('../assets/white-tiger-gift.mp4'), duration: 8000 },
+    { id: 'white-wolf', name: 'White Wolf', price: 1500, icon: '🐺', rarity: 'Legendary', category: 'Animals', video: require('../assets/white-wolf-gift.mp4'), duration: 8000 },
+    { id: 'desert-wolf', name: 'Desert Wolf', price: 1500, icon: '🐺', rarity: 'Legendary', category: 'Animals', video: require('../assets/desert-wolf-gift.mp4'), duration: 8000 },
   ];
 
   const [giftCategory, setGiftCategory] = useState('Popular');
@@ -279,7 +293,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={styles.categoryContent}>
-            {['Popular', 'Royal', 'Legendary', 'Ultra'].map(category => (
+            {['Popular', 'Royal', 'Animals', 'Action', 'Luxury', 'Space', 'Legendary', 'Ultra'].map(category => (
               <Pressable key={category} onPress={() => setGiftCategory(category)} style={[styles.categoryChip, giftCategory === category && styles.categoryChipActive]}>
                 <Text style={[styles.categoryChipText, giftCategory === category && styles.categoryChipTextActive]}>{category}</Text>
               </Pressable>
@@ -343,7 +357,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                         duration: 450,
                         useNativeDriver: true,
                       }).start(() => setActiveGift(null));
-                    }, 8200);
+                    }, gift.duration ?? 8200);
                   }}
                 >
                   {gift.id === 'lion' ? <Image source={require('../assets/lion-gift-preview.png')} style={styles.giftThumbnail} resizeMode='cover' /> : <Text style={styles.giftIcon}>{gift.icon}</Text>}
@@ -359,17 +373,17 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     </Modal>
 
     {activeGift && (
-      <Animated.View style={[styles.giftOverlay, { opacity: giftOpacity }]}>
+      <Animated.View pointerEvents="none" style={[styles.giftOverlay, { opacity: giftOpacity }]}>
         <View style={styles.giftBanner}>
           <Text style={styles.giftBannerText}>
             Hassan sent {activeGift.name} ×{giftCombo}
           </Text>
         </View>
 
-        {activeGift.id === 'lion' ? (
+        {activeGift.video ? (
           <Animated.View style={[styles.lionStage, { transform: [{ scale: giftScale }] }]}>
             <Video
-              source={require('../assets/lion-gift.mp4')}
+              source={activeGift.video}
               style={styles.lionImage}
               resizeMode={ResizeMode.COVER}
               shouldPlay
@@ -482,7 +496,7 @@ rarityCommon:{color:'#a7a7b0'},rarityEpic:{color:'#c084fc'},rarityLegendary:{col
 giftOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,zIndex:50,alignItems:'center',justifyContent:'center'},
 giftBanner:{position:'absolute',top:72,left:16,right:16,minHeight:56,borderRadius:30,backgroundColor:'rgba(20,12,5,0.94)',borderWidth:1,borderColor:'#f4bd4f',alignItems:'center',justifyContent:'center',paddingHorizontal:16},
 giftBannerText:{color:'#fff',fontSize:15,fontWeight:'800'},
-lionStage:{width:'62%',height:'42%',borderRadius:24,overflow:'hidden',borderWidth:1,borderColor:'rgba(255,215,106,0.55)',backgroundColor:'#111'},
+lionStage:{width:'48%',height:'58%',borderRadius:30,overflow:'hidden',borderWidth:1,borderColor:'rgba(255,215,106,0.65)',backgroundColor:'transparent',shadowColor:'#f7b942',shadowOpacity:0.65,shadowRadius:24,marginTop:70},
 lionImage:{width:'100%',height:'100%'},
 genericGiftStage:{width:'82%',height:'48%',borderRadius:30,backgroundColor:'rgba(32,22,10,0.96)',borderWidth:1,borderColor:'#d5a83c',alignItems:'center',justifyContent:'center'},
 genericGiftIcon:{fontSize:105},
