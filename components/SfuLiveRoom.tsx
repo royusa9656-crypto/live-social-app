@@ -1,3 +1,4 @@
+import { Video, ResizeMode } from 'expo-av';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
@@ -342,7 +343,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                         duration: 450,
                         useNativeDriver: true,
                       }).start(() => setActiveGift(null));
-                    }, 4200);
+                    }, 8200);
                   }}
                 >
                   {gift.id === 'lion' ? <Image source={require('../assets/lion-gift-preview.png')} style={styles.giftThumbnail} resizeMode='cover' /> : <Text style={styles.giftIcon}>{gift.icon}</Text>}
@@ -367,10 +368,14 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
 
         {activeGift.id === 'lion' ? (
           <Animated.View style={[styles.lionStage, { transform: [{ scale: giftScale }] }]}>
-            <Image
-              source={require('../assets/lion-gift-preview.png')}
+            <Video
+              source={require('../assets/lion-gift.mp4')}
               style={styles.lionImage}
-              resizeMode="cover"
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              isLooping={false}
+              isMuted={false}
+              useNativeControls={false}
             />
           </Animated.View>
         ) : (
