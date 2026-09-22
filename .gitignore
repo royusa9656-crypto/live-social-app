@@ -6,3 +6,5 @@ cloud-api/.env
 
 # Build output
 dist/
+
+.expo/
