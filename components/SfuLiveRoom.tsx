@@ -62,7 +62,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     { id: 'rose', name: 'Rose', price: 1, icon: '🌹', rarity: 'Common', category: 'Popular' },
     { id: 'heart', name: 'Heart', price: 5, icon: '💗', rarity: 'Common', category: 'Popular' },
     { id: 'crown', name: 'Crown', price: 500, icon: '👑', rarity: 'Epic', category: 'Royal' },
-    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary', video: require('../assets/lion-gift.mp4'), duration: 8000 },
+    { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary', video: require('../assets/lion-gift-green.mp4'), duration: 8000 },
     { id: 'dragon', name: 'Dragon', price: 2500, icon: '🐉', rarity: 'Legendary', category: 'Legendary' },
     { id: 'universe', name: 'Universe', price: 10000, icon: '🌌', rarity: 'Ultra', category: 'Ultra' },
 
