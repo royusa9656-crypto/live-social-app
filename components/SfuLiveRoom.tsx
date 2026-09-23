@@ -1,5 +1,5 @@
-import { Video, ResizeMode } from 'expo-av';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Video, ResizeMode } from 'expo-av';
 import {
   View,
   Text,
@@ -14,11 +14,10 @@ import {
 } from 'react-native';
 import { AudioSession, LiveKitRoom, useTracks, VideoTrack, useLocalParticipant, useRoomContext } from '@livekit/react-native';
 import { Track } from 'livekit-client';
+import { LionChromaVideo } from './LionChromaVideo';
 import { fetchLiveKitToken } from '../services/livekit';
-
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://live-social-app-five.vercel.app';
 const LIVEKIT_URL = process.env.EXPO_PUBLIC_LIVEKIT_URL || '';
-
 export default function SfuLiveRoom({ roomName, identity, role, onClose }: { roomName:string; identity:string; role:'host'|'guest'; onClose:()=>void }) {
   const [token, setToken] = useState<string>();
   const [wsUrl, setWsUrl] = useState(LIVEKIT_URL);
@@ -46,6 +45,8 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteUsers, setInviteUsers] = useState<any[]>([]);
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [multiGuestOpen, setMultiGuestOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   type Gift = {
     id: string;
@@ -53,9 +54,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     price: number;
     icon: string;
     rarity: string;
-    category: string;
-    video?: any;
-    duration?: number;
+ 
   };
 
   const giftCatalog: Gift[] = [
@@ -65,7 +64,6 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     { id: 'lion', name: 'Lion', price: 1000, icon: '🦁', rarity: 'Legendary', category: 'Legendary', video: require('../assets/lion-gift-green.mp4'), duration: 8000 },
     { id: 'dragon', name: 'Dragon', price: 2500, icon: '🐉', rarity: 'Legendary', category: 'Legendary' },
     { id: 'universe', name: 'Universe', price: 10000, icon: '🌌', rarity: 'Ultra', category: 'Ultra' },
-
     { id: 'desert-drifting', name: 'Desert Drifting', price: 500, icon: '🏜️', rarity: 'Epic', category: 'Action', video: require('../assets/desert-drifting-gift.mp4'), duration: 8000 },
     { id: 'golden-falcon', name: 'Golden Falcon', price: 750, icon: '🦅', rarity: 'Epic', category: 'Animals', video: require('../assets/golden-falcon-gift.mp4'), duration: 8000 },
     { id: 'feature-city', name: 'Feature City', price: 1000, icon: '🌆', rarity: 'Legendary', category: 'Luxury', video: require('../assets/feature-city-gift.mp4'), duration: 8000 },
@@ -130,7 +128,6 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
   );
 
   return <View style={styles.room}>
-    <View style={styles.header}><Text style={styles.live}>● LIVE</Text><Text style={styles.roomText}>NEW-LAYOUT-TEST · {room.name} · {role.toUpperCase()}</Text><Pressable onPress={onClose}><Text style={styles.close}>×</Text></Pressable></View>
     <View style={styles.grid}>
       {(() => {
         const hostTrack = role === 'host'
@@ -156,8 +153,9 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
               </View>
             )}
 
-            <View style={styles.guestArea}>
-              {guestTracks.map((t:any, i:number) => (
+            {guestCount > 0 && (
+              <View style={styles.guestArea}>
+                {guestTracks.map((t:any, i:number) => (
                 <View
                   key={t.publication?.trackSid || `${t.participant?.identity}-${i}`}
                   style={[
@@ -178,7 +176,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                 </View>
               ))}
 
-              {Array.from({length: emptySlots}).map((_, i) => (
+              {guestCount > 0 && Array.from({length: emptySlots}).map((_, i) => (
                 <Pressable
                   key={`empty-${i}`}
                   style={[
@@ -194,8 +192,9 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                 >
                   <Text style={styles.emptyText}>+ Invite</Text>
                 </Pressable>
-              ))}
-            </View>
+                ))}
+              </View>
+            )}
           </>
         );
       })()}
@@ -264,17 +263,24 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     )}
 
     <View style={styles.controls}>
-      <Pressable style={styles.control} onPress={() => localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)}><Text style={styles.controlText}>{isMicrophoneEnabled ? 'Mic' : 'Muted'}</Text></Pressable>
-
-      <Pressable style={styles.control} onPress={() => localParticipant.setCameraEnabled(!isCameraEnabled)}><Text style={styles.controlText}>{isCameraEnabled ? 'Camera' : 'Camera Off'}</Text></Pressable>
+      <Pressable style={styles.control} onPress={() => setMultiGuestOpen(true)}>
+        <Text style={styles.controlIcon}>👥</Text>
+        <Text style={styles.controlLabel}>Guests</Text>
+      </Pressable>
 
       <Pressable style={styles.giftControl} onPress={() => setGiftOpen(true)}>
         <Text style={styles.giftControlIcon}>🎁</Text>
         <Text style={styles.giftControlText}>Gift</Text>
       </Pressable>
 
-      <Pressable style={styles.control} onPress={() => { room.disconnect(); onClose(); }}>
-        <Text style={styles.end}>Leave</Text>
+      <Pressable style={styles.control} onPress={() => setMoreOpen(true)}>
+        <Text style={styles.controlIcon}>•••</Text>
+        <Text style={styles.controlLabel}>More</Text>
+      </Pressable>
+
+      <Pressable style={styles.control} onPress={() => {}}>
+        <Text style={styles.controlIcon}>↗</Text>
+        <Text style={styles.controlLabel}>Share</Text>
       </Pressable>
     </View>
 
@@ -375,63 +381,63 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                   <Text style={styles.giftName}>{gift.name}</Text>
                   <Text style={styles.giftPrice}>{gift.price.toLocaleString()} coins</Text>
                   <Text style={[styles.giftRarity, gift.rarity === 'Common' && styles.rarityCommon, gift.rarity === 'Epic' && styles.rarityEpic, gift.rarity === 'Legendary' && styles.rarityLegendary, gift.rarity === 'Ultra' && styles.rarityUltra]}>{gift.rarity}</Text>
-                </Pressable>
-              );
+             </Pressable>);
             })}
           </View>
         </View>
       </View>
     </Modal>
 
-    {activeGift && (
-      <Animated.View pointerEvents="none" style={[styles.giftOverlay, { opacity: giftOpacity }]}>
-        <View style={styles.giftBanner}>
-          <Text style={styles.giftBannerText}>
-            Hassan sent {activeGift.name} ×{giftCombo}
-          </Text>
-        </View>
+    {multiGuestOpen && (<View style={styles.multiGuestOverlay}><View style={styles.multiGuestPanel}><View style={styles.multiGuestHandle} /><View style={styles.multiGuestHeader}><Text style={styles.multiGuestTitle}>Multi-Guest</Text><Pressable onPress={() => setMultiGuestOpen(false)}><Text style={styles.multiGuestClose}>×</Text></Pressable></View><Text style={styles.multiGuestSub}>Invite people to join your live</Text><Pressable style={styles.multiGuestAction} onPress={() => { setMultiGuestOpen(false); setInviteOpen(true); }}><Text style={styles.multiGuestActionIcon}>＋</Text><View><Text style={styles.multiGuestActionTitle}>Invite Guest</Text><Text style={styles.multiGuestActionSub}>Choose someone to join your live</Text></View></Pressable><Pressable style={styles.multiGuestAction} onPress={() => setMultiGuestOpen(false)}><Text style={styles.multiGuestActionIcon}>⚔</Text><View><Text style={styles.multiGuestActionTitle}>PK Battle</Text><Text style={styles.multiGuestActionSub}>Start a live battle with another host</Text></View></Pressable></View></View>)}
+   {activeGift && (
+  <Animated.View
+    pointerEvents="none"
+    style={[styles.giftOverlay, { opacity: giftOpacity }]}
+  >
+    <View style={styles.giftBanner}>
+      <Text style={styles.giftBannerText}>
+        Hassan sent {activeGift.name} ×{giftCombo}
+      </Text>
+    </View>
 
-        {activeGift.video ? (
-          <Animated.View
-            style={[
-              styles.lionStage,
-              {
-                opacity: giftOpacity,
-                transform: [{ scale: giftScale }],
-              },
-            ]}
-          >
-            <Video
-              source={activeGift.video}
-              style={styles.lionImage}
-              resizeMode={ResizeMode.CONTAIN}
-              shouldPlay
-              isLooping={false}
-              isMuted={false}
-              useNativeControls={false}
-            />
-          </Animated.View>
-        ) : (
-          <Animated.View
-            style={[
-              styles.genericGiftStage,
-              {
-                transform: [{ scale: giftScale }],
-              },
-            ]}
-          >
-            <Text style={styles.genericGiftIcon}>{activeGift.icon}</Text>
-            <Text style={styles.genericGiftTitle}>
-              {activeGift.name.toUpperCase()}
-            </Text>
-            <Text style={styles.genericGiftSub}>
-              {activeGift.rarity} Gift
-            </Text>
-          </Animated.View>
-        )}
+    {activeGift.video ? (
+      <Animated.View
+        style={[
+          styles.lionStage,
+          {
+            opacity: giftOpacity,
+            transform: [{ scale: giftScale }],
+          },
+        ]}
+      >
+        <LionChromaVideo source={activeGift.video} />
+      </Animated.View>
+    ) : (
+      <Animated.View
+        style={[
+          styles.genericGiftStage,
+          {
+            transform: [{ scale: giftScale }],
+          },
+        ]}
+      >
+        <Text style={styles.genericGiftIcon}>
+          {activeGift.icon}
+        </Text>
+
+        <Text style={styles.genericGiftTitle}>
+          {activeGift.name.toUpperCase()}
+        </Text>
+
+        <Text style={styles.genericGiftSub}>
+          {activeGift.rarity} Gift
+        </Text>
       </Animated.View>
     )}
-  </View>;
+  </Animated.View>
+)}
+
+    </View>;
 }
 
 const styles=StyleSheet.create({room:{flex:1,backgroundColor:'#050505'},center:{flex:1,backgroundColor:'#050505',alignItems:'center',justifyContent:'center',padding:24},loading:{color:'#fff',fontSize:17},error:{color:'#ff6d9d',textAlign:'center',marginBottom:18},button:{paddingHorizontal:22,paddingVertical:12,borderRadius:22,backgroundColor:'#ff2d72'},buttonText:{color:'#fff',fontWeight:'800'},header:{height:64,paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:10},live:{color:'#ff3b78',fontWeight:'900'},roomText:{color:'#ddd',flex:1},close:{color:'#fff',fontSize:30},grid:{
@@ -451,9 +457,6 @@ tile:{
 hostTile:{
   width:'100%',
   height:'70%',
-  borderWidth:6,
-  borderColor:'#ff0000',
-  backgroundColor:'#ff0000',
   position:'relative'
 },
 guestArea:{
@@ -492,8 +495,8 @@ hostBadgeText:{
   color:'#fff',
   fontSize:10,
   fontWeight:'900'
-},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},controls:{position:'absolute',bottom:16,left:14,right:14,flexDirection:'row',gap:8,justifyContent:'center'},control:{paddingHorizontal:16,paddingVertical:12,borderRadius:22,backgroundColor:'#191919'},
-giftControl:{paddingHorizontal:14,paddingVertical:9,borderRadius:22,backgroundColor:'#ff2d72',alignItems:'center',justifyContent:'center'},
+},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},controls:{position:'absolute',bottom:18,left:14,right:14,flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center'},control:{minWidth:72,height:44,paddingHorizontal:12,borderRadius:22,backgroundColor:'rgba(15,15,22,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7},controlIcon:{fontSize:17,color:'#fff',lineHeight:20},controlLabel:{color:'#fff',fontSize:12,fontWeight:'700'},
+giftControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(255,45,114,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(220,45,65,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endIcon:{color:'#fff',fontSize:18,fontWeight:'900'},endLabel:{color:'#fff',fontSize:9,fontWeight:'800',marginTop:1},
 giftControlIcon:{fontSize:18},
 giftControlText:{color:'#fff',fontWeight:'800',fontSize:10,marginTop:1},
 giftModal:{flex:1,backgroundColor:'rgba(0,0,0,0.55)',justifyContent:'flex-end'},
@@ -532,4 +535,4 @@ genericGiftTitle:{color:'#ffe08a',fontSize:28,fontWeight:'900',letterSpacing:2,m
 genericGiftSub:{color:'#fff',fontSize:13,marginTop:7,opacity:0.9},
 giftCaption:{position:'absolute',bottom:96,alignItems:'center'},
 giftTitle:{color:'#ffe08a',fontSize:27,fontWeight:'900',letterSpacing:2,textShadowColor:'#000',textShadowRadius:10},
-giftSub:{color:'#fff',fontSize:13,marginTop:4,opacity:0.9},controlText:{color:'#fff',fontWeight:'700'},end:{color:'#ff6b96',fontWeight:'900'},inviteOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,backgroundColor:'#0009',zIndex:20,justifyContent:'flex-end'},invitePanel:{backgroundColor:'#151515',borderTopLeftRadius:24,borderTopRightRadius:24,padding:18,paddingBottom:32},inviteHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:6},inviteTitle:{color:'#fff',fontSize:21,fontWeight:'900'},inviteClose:{color:'#fff',fontSize:30},inviteSubtitle:{color:'#999',fontSize:13,marginBottom:14},userRow:{height:58,flexDirection:'row',alignItems:'center',borderBottomWidth:1,borderBottomColor:'#292929'},avatar:{width:40,height:40,borderRadius:20,backgroundColor:'#292929',alignItems:'center',justifyContent:'center'},avatarText:{color:'#fff',fontWeight:'900'},userName:{color:'#fff',fontSize:15,fontWeight:'700',flex:1,marginLeft:12},inviteButton:{backgroundColor:'#ff2d72',paddingHorizontal:17,paddingVertical:9,borderRadius:18},inviteButtonText:{color:'#fff',fontWeight:'900'},incomingOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,backgroundColor:'#000b',zIndex:30,alignItems:'center',justifyContent:'center',padding:24},incomingPanel:{width:'100%',backgroundColor:'#171717',borderRadius:24,padding:22},incomingTitle:{color:'#fff',fontSize:22,fontWeight:'900',marginBottom:8},incomingText:{color:'#bbb',fontSize:15,lineHeight:22,marginBottom:20},incomingActions:{flexDirection:'row',gap:12},rejectButton:{flex:1,backgroundColor:'#292929',paddingVertical:13,borderRadius:22,alignItems:'center'},acceptButton:{flex:1,backgroundColor:'#ff2d72',paddingVertical:13,borderRadius:22,alignItems:'center'},actionText:{color:'#fff',fontWeight:'900'}});
+giftSub:{color:'#fff',fontSize:13,marginTop:4,opacity:0.9},controlText:{color:'#fff',fontWeight:'700'},end:{color:'#ff6b96',fontWeight:'900'},inviteOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,backgroundColor:'#0009',zIndex:20,justifyContent:'flex-end'},invitePanel:{backgroundColor:'#151515',borderTopLeftRadius:24,borderTopRightRadius:24,padding:18,paddingBottom:32},inviteHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:6},inviteTitle:{color:'#fff',fontSize:21,fontWeight:'900'},inviteClose:{color:'#fff',fontSize:30},inviteSubtitle:{color:'#999',fontSize:13,marginBottom:14},userRow:{height:58,flexDirection:'row',alignItems:'center',borderBottomWidth:1,borderBottomColor:'#292929'},avatar:{width:40,height:40,borderRadius:20,backgroundColor:'#292929',alignItems:'center',justifyContent:'center'},avatarText:{color:'#fff',fontWeight:'900'},userName:{color:'#fff',fontSize:15,fontWeight:'700',flex:1,marginLeft:12},inviteButton:{backgroundColor:'#ff2d72',paddingHorizontal:17,paddingVertical:9,borderRadius:18},inviteButtonText:{color:'#fff',fontWeight:'900'},incomingOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,backgroundColor:'#000b',zIndex:30,alignItems:'center',justifyContent:'center',padding:24},incomingPanel:{width:'100%',backgroundColor:'#171717',borderRadius:24,padding:22},incomingTitle:{color:'#fff',fontSize:22,fontWeight:'900',marginBottom:8},incomingText:{color:'#bbb',fontSize:15,lineHeight:22,marginBottom:20},incomingActions:{flexDirection:'row',gap:12},rejectButton:{flex:1,backgroundColor:'#292929',paddingVertical:13,borderRadius:22,alignItems:'center'},acceptButton:{flex:1,backgroundColor:'#ff2d72',paddingVertical:13,borderRadius:22,alignItems:'center'},multiGuestOverlay:{position:'absolute',left:0,right:0,top:0,bottom:0,backgroundColor:'rgba(0,0,0,0.48)',zIndex:40,justifyContent:'flex-end'},multiGuestPanel:{backgroundColor:'#101016',borderTopLeftRadius:30,borderTopRightRadius:30,paddingHorizontal:20,paddingTop:10,paddingBottom:32},multiGuestHandle:{width:42,height:4,borderRadius:4,backgroundColor:'#555',alignSelf:'center',marginBottom:18},multiGuestHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},multiGuestTitle:{color:'#fff',fontSize:24,fontWeight:'900'},multiGuestClose:{color:'#fff',fontSize:30,width:38,height:38,borderRadius:19,backgroundColor:'#202027',textAlign:'center',lineHeight:35},multiGuestSub:{color:'#8f8f9c',fontSize:13,marginTop:5,marginBottom:18},multiGuestAction:{flexDirection:'row',alignItems:'center',backgroundColor:'#181820',borderRadius:20,padding:16,marginBottom:10,borderWidth:1,borderColor:'#272732'},multiGuestActionIcon:{width:48,height:48,borderRadius:16,backgroundColor:'#252532',textAlign:'center',lineHeight:48,fontSize:24,color:'#fff',marginRight:14},multiGuestActionTitle:{color:'#fff',fontSize:16,fontWeight:'800'},multiGuestActionSub:{color:'#8f8f9c',fontSize:12,marginTop:4},actionText:{color:'#fff',fontWeight:'900'}});
