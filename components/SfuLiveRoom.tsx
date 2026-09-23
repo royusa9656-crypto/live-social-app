@@ -456,8 +456,9 @@ tile:{
 },
 hostTile:{
   width:'100%',
-  height:'70%',
-  position:'relative'
+  height:'100%',
+  position:'relative',
+  backgroundColor:'#050505'
 },
 guestArea:{
   width:'100%',
