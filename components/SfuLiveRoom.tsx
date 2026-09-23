@@ -147,9 +147,6 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                 <View style={styles.label}>
                   <Text style={styles.labelText}>HOST</Text>
                 </View>
-                <View style={styles.hostBadge}>
-                  <Text style={styles.hostBadgeText}>HOST</Text>
-                </View>
               </View>
             )}
 
@@ -261,6 +258,24 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
         </View>
       </View>
     )}
+
+    <View style={styles.topLiveBar}>
+      <View style={styles.topLiveAvatar}>
+        <Text style={styles.topLiveAvatarText}>
+          {(localParticipant.identity || '?').charAt(0).toUpperCase()}
+        </Text>
+      </View>
+      <View style={styles.topLiveInfo}>
+        <Text style={styles.topLiveName} numberOfLines={1}>
+          {localParticipant.identity || 'Live Host'}
+        </Text>
+        <Text style={styles.topLiveStatus}>LIVE NOW</Text>
+      </View>
+      <View style={styles.topLiveBadge}>
+        <View style={styles.topLiveDot} />
+        <Text style={styles.topLiveBadgeText}>LIVE</Text>
+      </View>
+    </View>
 
     <View style={styles.controls}>
       <Pressable style={styles.control} onPress={() => setMultiGuestOpen(true)}>
@@ -496,7 +511,16 @@ hostBadgeText:{
   color:'#fff',
   fontSize:10,
   fontWeight:'900'
-},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},controls:{position:'absolute',bottom:18,left:14,right:14,flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center'},control:{minWidth:72,height:44,paddingHorizontal:12,borderRadius:22,backgroundColor:'rgba(15,15,22,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7},controlIcon:{fontSize:17,color:'#fff',lineHeight:20},controlLabel:{color:'#fff',fontSize:12,fontWeight:'700'},
+},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},topLiveBar:{position:'absolute',top:16,left:14,right:14,height:58,borderRadius:29,backgroundColor:'rgba(12,12,18,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',flexDirection:'row',alignItems:'center',paddingHorizontal:8,zIndex:10},
+topLiveAvatar:{width:42,height:42,borderRadius:21,backgroundColor:'#252532',alignItems:'center',justifyContent:'center'},
+topLiveAvatarText:{color:'#fff',fontSize:16,fontWeight:'800'},
+topLiveInfo:{flex:1,marginLeft:10},
+topLiveName:{color:'#fff',fontSize:13,fontWeight:'800'},
+topLiveStatus:{color:'#aaa',fontSize:10,fontWeight:'600',marginTop:2},
+topLiveBadge:{height:32,paddingHorizontal:12,borderRadius:16,backgroundColor:'rgba(255,45,114,0.18)',borderWidth:1,borderColor:'rgba(255,45,114,0.45)',flexDirection:'row',alignItems:'center',gap:6},
+topLiveDot:{width:7,height:7,borderRadius:4,backgroundColor:'#ff2d72'},
+topLiveBadgeText:{color:'#fff',fontSize:10,fontWeight:'900'},
+controls:{position:'absolute',bottom:18,left:14,right:14,flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center'},control:{minWidth:72,height:44,paddingHorizontal:12,borderRadius:22,backgroundColor:'rgba(15,15,22,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7},controlIcon:{fontSize:17,color:'#fff',lineHeight:20},controlLabel:{color:'#fff',fontSize:12,fontWeight:'700'},
 giftControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(255,45,114,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(220,45,65,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endIcon:{color:'#fff',fontSize:18,fontWeight:'900'},endLabel:{color:'#fff',fontSize:9,fontWeight:'800',marginTop:1},
 giftControlIcon:{fontSize:18},
 giftControlText:{color:'#fff',fontWeight:'800',fontSize:10,marginTop:1},
