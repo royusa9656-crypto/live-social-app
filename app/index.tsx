@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import SfuLiveRoom from '../components/SfuLiveRoom';
+import AuthScreen from '../components/AuthScreen';
 
 import {
   View,
@@ -48,9 +49,46 @@ const FEED = [
 ];
 
 export default function Home() {
+  const [sessionReady, setSessionReady] = useState(false);
+  const [session, setSession] = useState<any>(null);
   const [tab, setTab] = useState<'following' | 'foryou'>('foryou');
   const [liked, setLiked] = useState<string | null>(null);
   const [showLive, setShowLive] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setSession(data.session);
+      setSessionReady(true);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setSessionReady(true);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (!sessionReady) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#07070b', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#fff' }}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!session) {
+    return <AuthScreen onAuthenticated={() => {}} />;
+  }
 
   const renderItem = ({ item }: any) => (
     <View style={[styles.video, { backgroundColor: item.gradient }]}>
@@ -155,9 +193,9 @@ export default function Home() {
           <Text style={styles.navText}>Live</Text>
         </Pressable>
 
-        <Pressable style={styles.navItem}>
+        <Pressable style={styles.navItem} onPress={() => supabase.auth.signOut()}>
           <Text style={styles.navIcon}>●</Text>
-          <Text style={styles.navText}>Profile</Text>
+          <Text style={styles.navText}>Logout</Text>
         </Pressable>
       </View>
     </View>

@@ -46,6 +46,7 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
   const [inviteUsers, setInviteUsers] = useState<any[]>([]);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [multiGuestOpen, setMultiGuestOpen] = useState(false);
+  const [pkBattleOpen, setPkBattleOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
   type Gift = {
@@ -127,6 +128,14 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
     (participant) => participant.identity !== localParticipant.identity
   );
 
+  const multiHostTrack = role === 'host'
+    ? cameraTracks.find((t:any) => t.participant?.identity === localParticipant.identity)
+    : cameraTracks[0];
+
+  const multiGuestTracks = cameraTracks.filter(
+    (t:any) => t !== multiHostTrack
+  ).slice(0, 6);
+
   return <View style={styles.room}>
     <View style={styles.grid}>
       {(() => {
@@ -146,6 +155,9 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
                 <VideoTrack trackRef={hostTrack} style={styles.video} />
                 <View style={styles.label}>
                   <Text style={styles.labelText}>HOST</Text>
+                </View>
+                <View style={styles.hostBadge}>
+                  <Text style={styles.hostBadgeText}>HOST</Text>
                 </View>
               </View>
             )}
@@ -258,24 +270,6 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
         </View>
       </View>
     )}
-
-    <View style={styles.topLiveBar}>
-      <View style={styles.topLiveAvatar}>
-        <Text style={styles.topLiveAvatarText}>
-          {(localParticipant.identity || '?').charAt(0).toUpperCase()}
-        </Text>
-      </View>
-      <View style={styles.topLiveInfo}>
-        <Text style={styles.topLiveName} numberOfLines={1}>
-          {localParticipant.identity || 'Live Host'}
-        </Text>
-        <Text style={styles.topLiveStatus}>LIVE NOW</Text>
-      </View>
-      <View style={styles.topLiveBadge}>
-        <View style={styles.topLiveDot} />
-        <Text style={styles.topLiveBadgeText}>LIVE</Text>
-      </View>
-    </View>
 
     <View style={styles.controls}>
       <Pressable style={styles.control} onPress={() => setMultiGuestOpen(true)}>
@@ -403,8 +397,1522 @@ function RoomGrid({ role, onClose }:{role:'host'|'guest';onClose:()=>void}) {
       </View>
     </Modal>
 
-    {multiGuestOpen && (<View style={styles.multiGuestOverlay}><View style={styles.multiGuestPanel}><View style={styles.multiGuestHandle} /><View style={styles.multiGuestHeader}><Text style={styles.multiGuestTitle}>Multi-Guest</Text><Pressable onPress={() => setMultiGuestOpen(false)}><Text style={styles.multiGuestClose}>×</Text></Pressable></View><Text style={styles.multiGuestSub}>Invite people to join your live</Text><Pressable style={styles.multiGuestAction} onPress={() => { setMultiGuestOpen(false); setInviteOpen(true); }}><Text style={styles.multiGuestActionIcon}>＋</Text><View><Text style={styles.multiGuestActionTitle}>Invite Guest</Text><Text style={styles.multiGuestActionSub}>Choose someone to join your live</Text></View></Pressable><Pressable style={styles.multiGuestAction} onPress={() => setMultiGuestOpen(false)}><Text style={styles.multiGuestActionIcon}>⚔</Text><View><Text style={styles.multiGuestActionTitle}>PK Battle</Text><Text style={styles.multiGuestActionSub}>Start a live battle with another host</Text></View></Pressable></View></View>)}
-   {activeGift && (
+    {multiGuestOpen && (
+  <View
+    style={{
+      position:'absolute',
+      left:0,
+      right:0,
+      top:0,
+      bottom:0,
+      zIndex:40,
+      backgroundColor:'#07050c',
+      paddingTop:8,
+      paddingHorizontal:7,
+    }}
+  >
+
+    {/* HEADER — SAME PROPORTION AS REFERENCE */}
+    <View
+      style={{
+        height:72,
+        flexDirection:'row',
+        alignItems:'center',
+        paddingHorizontal:7,
+      }}
+    >
+      <View
+        style={{
+          width:48,
+          height:48,
+          borderRadius:24,
+          borderWidth:2,
+          borderColor:'#d77aff',
+          backgroundColor:'#171421',
+          shadowColor:'#c56cff',
+          shadowOpacity:.35,
+          shadowRadius:8,
+          elevation:5,
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text style={{color:'#fff',fontSize:19,fontWeight:'800'}}>
+          {(localParticipant.name ||
+            localParticipant.identity ||
+            'L').charAt(0).toUpperCase()}
+        </Text>
+      </View>
+
+      <View style={{marginLeft:9,flex:1}}>
+        <Text
+          numberOfLines={1}
+          style={{
+            color:'#fff',
+            fontSize:17,
+            fontWeight:'800',
+            letterSpacing:.2,
+          }}
+        >
+          {localParticipant.name ||
+            localParticipant.identity ||
+            'Live'}
+        </Text>
+
+        <Pressable
+          onPress={() => {}}
+          style={{
+            position:'absolute',
+            left:105,
+            top:1,
+            height:28,
+            minWidth:62,
+            paddingHorizontal:12,
+            borderRadius:14,
+            backgroundColor:'#ff3b81',
+            alignItems:'center',
+            justifyContent:'center',
+          }}
+        >
+          <Text
+            style={{
+              color:'#fff',
+              fontSize:11,
+              fontWeight:'800',
+            }}
+          >
+            Follow
+          </Text>
+        </Pressable>
+
+        <Text
+          style={{
+            color:'#d77aff',
+            fontSize:10,
+            fontWeight:'800',
+            letterSpacing:1.1,
+            marginTop:3,
+          }}
+        >
+          LIVE
+        </Text>
+      </View>
+
+      <Pressable
+        onPress={() => setMultiGuestOpen(false)}
+        style={{
+          width:42,
+          height:52,
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text
+          style={{
+            color:'#fff',
+            fontSize:34,
+            fontWeight:'200',
+          }}
+        >
+          ×
+        </Text>
+      </Pressable>
+    </View>
+
+    {/* MAIN VIDEO AREA — REFERENCE SIZE */}
+    <View
+      style={{
+        height:'45%',
+        flexDirection:'row',
+        gap:7,
+      }}
+    >
+
+      {/* HOST — 50% */}
+      <View
+        style={{
+          width:'50%',
+          borderRadius:12,
+          overflow:'hidden',
+          backgroundColor:'#100d17',
+          borderWidth:1,
+          borderColor:'rgba(197,108,255,.72)',
+        }}
+      >
+        {multiHostTrack ? (
+          <VideoTrack
+            trackRef={multiHostTrack}
+            style={{
+              position:'absolute',
+              left:0,
+              right:0,
+              top:0,
+              bottom:0,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              flex:1,
+              alignItems:'center',
+              justifyContent:'center',
+            }}
+          >
+            <Text style={{color:'#777'}}>
+              Camera unavailable
+            </Text>
+          </View>
+        )}
+
+        <View
+          style={{
+            position:'absolute',
+            left:8,
+            top:8,
+            backgroundColor:'#ff315f',
+            borderRadius:18,
+            paddingHorizontal:12,
+            paddingVertical:7,
+          }}
+        >
+          <Text
+            style={{
+              color:'#fff',
+              fontSize:14,
+              fontWeight:'900',
+            }}
+          >
+            LIVE
+          </Text>
+        </View>
+      </View>
+
+      {/* 6 REAL GUEST PANELS — 2 x 3 */}
+      <View
+        style={{
+          width:'50%',
+          flexDirection:'row',
+          flexWrap:'wrap',
+          gap:6,
+        }}
+      >
+        {Array.from({length:6}).map((_,i) => {
+          const guestTrack = multiGuestTracks[i];
+
+          return (
+            <Pressable
+              key={i}
+              onPress={() => {
+                if (!guestTrack) setInviteOpen(true);
+              }}
+              style={{
+                width:'48%',
+                height:'32%',
+                borderRadius:11,
+                overflow:'hidden',
+                backgroundColor:'#100d17',
+                borderWidth:1,
+                borderColor:'rgba(255,255,255,.14)',
+              }}
+            >
+              {guestTrack ? (
+                <VideoTrack
+                  trackRef={guestTrack}
+                  style={{
+                    position:'absolute',
+                    left:0,
+                    right:0,
+                    top:0,
+                    bottom:0,
+                  }}
+                />
+              ) : (
+                <View
+                  style={{
+                    flex:1,
+                    alignItems:'center',
+                    justifyContent:'center',
+                  }}
+                >
+                  <View
+                    style={{
+                      width:42,
+                      height:42,
+                      borderRadius:21,
+                      backgroundColor:'rgba(255,255,255,.96)',
+                      alignItems:'center',
+                      justifyContent:'center',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color:'#e5008f',
+                        fontSize:30,
+                        fontWeight:'300',
+                      }}
+                    >
+                      +
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {guestTrack && (
+                <View
+                  style={{
+                    position:'absolute',
+                    left:6,
+                    right:6,
+                    bottom:6,
+                    backgroundColor:'rgba(0,0,0,.65)',
+                    borderRadius:9,
+                    paddingHorizontal:6,
+                    paddingVertical:4,
+                  }}
+                >
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      color:'#fff',
+                      fontSize:9,
+                      fontWeight:'700',
+                    }}
+                  >
+                    {guestTrack.participant?.name ||
+                      guestTrack.participant?.identity ||
+                      ''}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+
+    {/* COMMENTS SPACE — SAME LARGE LOWER AREA */}
+    <View
+      style={{
+        flex:1,
+        marginTop:10,
+        marginBottom:8,
+        borderRadius:10,
+        backgroundColor:'rgba(24,18,30,.82)',
+        borderWidth:1,
+        borderColor:'rgba(255,255,255,.08)',
+        alignItems:'center',
+        justifyContent:'center',
+      }}
+    >
+      <Text
+        style={{
+          color:'#8f8b98',
+          fontSize:14,
+          fontWeight:'600',
+          letterSpacing:.2,
+        }}
+      >
+        No comments yet
+      </Text>
+    </View>
+
+    {/* BOTTOM INTERACTION BAR — NO FAKE DATA */}
+    <View
+      style={{
+        height:68,
+        flexDirection:'row',
+        alignItems:'center',
+        paddingHorizontal:7,
+        gap:8,
+      }}
+    >
+      <View
+        style={{
+          width:48,
+          height:48,
+          borderRadius:24,
+          backgroundColor:'rgba(25,22,34,.94)',
+          borderWidth:1,
+          borderColor:'rgba(255,255,255,.12)',
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text style={{color:'#fff',fontSize:25}}>☆</Text>
+      </View>
+
+      <View
+        style={{
+          flex:1,
+          height:46,
+          borderRadius:23,
+          backgroundColor:'rgba(25,22,34,.94)',
+          borderWidth:1,
+          borderColor:'rgba(255,255,255,.12)',
+          justifyContent:'center',
+          paddingHorizontal:18,
+        }}
+      >
+        <Text
+          style={{
+            color:'#96919f',
+            fontSize:15,
+            fontWeight:'500',
+          }}
+        >
+          Add comment...
+        </Text>
+      </View>
+
+      <Pressable
+        onPress={() => setPkBattleOpen(true)}
+        style={{
+          width:46,
+          height:46,
+          borderRadius:23,
+          backgroundColor:'rgba(25,22,34,.94)',
+          borderWidth:1,
+          borderColor:'rgba(255,255,255,.12)',
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text
+          style={{
+            color:'#ff4b9b',
+            fontSize:13,
+            fontWeight:'900',
+          }}
+        >
+          PK
+        </Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => setGiftOpen(true)}
+        style={{
+          width:46,
+          height:46,
+          borderRadius:23,
+          backgroundColor:'rgba(25,22,34,.94)',
+          borderWidth:1,
+          borderColor:'rgba(255,255,255,.12)',
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text style={{fontSize:23}}>🎁</Text>
+      </Pressable>
+
+      <View
+        style={{
+          width:46,
+          height:46,
+          borderRadius:23,
+          backgroundColor:'rgba(25,22,34,.94)',
+          borderWidth:1,
+          borderColor:'rgba(255,255,255,.12)',
+          alignItems:'center',
+          justifyContent:'center',
+        }}
+      >
+        <Text style={{color:'#fff',fontSize:23}}>↗</Text>
+      </View>
+    </View>
+
+  </View>
+)}
+
+{pkBattleOpen && (
+  <View
+    style={{
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      zIndex: 80,
+      elevation: 80,
+      backgroundColor: '#050509',
+    }}
+  >
+
+    {/* =========================
+        PK TOP HEADER
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        top: 12,
+        left: 18,
+        right: 18,
+        height: 104,
+        zIndex: 30,
+        elevation: 30,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          height: 72,
+        }}
+      >
+
+        {/* HOST PROFILE */}
+        <View
+          style={{
+            width: 68,
+            height: 68,
+            borderRadius: 34,
+            backgroundColor: '#25232b',
+            borderWidth: 2,
+            borderColor: 'rgba(255,255,255,0.22)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+          }}
+        >
+          <Text style={{ fontSize: 35 }}>👩🏻</Text>
+        </View>
+
+        <View
+          style={{
+            marginLeft: 10,
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 23,
+                fontWeight: '900',
+              }}
+            >
+              Anna
+            </Text>
+
+            <View
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: '#1da1f2',
+                marginLeft: 6,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: '900',
+                }}
+              >
+                ✓
+              </Text>
+            </View>
+          </View>
+
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 16,
+              marginTop: 2,
+              fontWeight: '700',
+            }}
+          >
+            ❤️ 2.5M
+          </Text>
+        </View>
+
+        {/* FOLLOW */}
+        <Pressable
+          style={{
+            height: 44,
+            paddingHorizontal: 17,
+            borderRadius: 22,
+            backgroundColor: '#ff1687',
+            marginLeft: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: '900',
+            }}
+          >
+            + Follow
+          </Text>
+        </Pressable>
+
+        <View style={{ flex: 1 }} />
+
+        {/* SUPPORTERS */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginRight: 18,
+          }}
+        >
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: '#28232c',
+              borderWidth: 2,
+              borderColor: '#ff9d22',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 25 }}>👩🏻</Text>
+          </View>
+
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: '#28232c',
+              borderWidth: 2,
+              borderColor: '#398cff',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: -10,
+            }}
+          >
+            <Text style={{ fontSize: 25 }}>👩🏼</Text>
+          </View>
+
+          <View
+            style={{
+              position: 'absolute',
+              left: 2,
+              top: 38,
+              paddingHorizontal: 6,
+              height: 19,
+              borderRadius: 10,
+              backgroundColor: 'rgba(20,20,25,0.95)',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.10)',
+            }}
+          >
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 9,
+                fontWeight: '900',
+              }}
+            >
+              10K+
+            </Text>
+          </View>
+
+          <View
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 38,
+              paddingHorizontal: 6,
+              height: 19,
+              borderRadius: 10,
+              backgroundColor: 'rgba(20,20,25,0.95)',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.10)',
+            }}
+          >
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 9,
+                fontWeight: '900',
+              }}
+            >
+              10K+
+            </Text>
+          </View>
+        </View>
+
+        {/* VIEWERS */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginRight: 18,
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 23 }}>
+            ♟
+          </Text>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 19,
+              fontWeight: '900',
+              marginLeft: 6,
+            }}
+          >
+            12.4K
+          </Text>
+        </View>
+
+        {/* CLOSE */}
+        <Pressable
+          onPress={() => setPkBattleOpen(false)}
+          style={{
+            width: 48,
+            height: 48,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 47,
+              fontWeight: '200',
+              lineHeight: 48,
+            }}
+          >
+            ×
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* WEEKLY / EXPLORE */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: 6,
+        }}
+      >
+        <View
+          style={{
+            height: 48,
+            paddingHorizontal: 16,
+            borderRadius: 24,
+            backgroundColor: 'rgba(25,25,31,0.94)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.08)',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 27 }}>🔥</Text>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: '800',
+              marginLeft: 8,
+            }}
+          >
+            Weekly No. 1
+          </Text>
+        </View>
+
+        <View
+          style={{
+            height: 48,
+            paddingHorizontal: 16,
+            borderRadius: 24,
+            backgroundColor: 'rgba(25,25,31,0.94)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.08)',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 25 }}>🪐</Text>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: '800',
+              marginLeft: 8,
+            }}
+          >
+            Explore
+          </Text>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 25,
+              marginLeft: 7,
+            }}
+          >
+            ›
+          </Text>
+        </View>
+      </View>
+    </View>
+
+    {/* =========================
+        SCORE BAR
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        top: '13%',
+        left: 8,
+        right: 8,
+        height: 52,
+        zIndex: 25,
+        elevation: 25,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 26,
+        overflow: 'hidden',
+        backgroundColor: '#087df7',
+      }}
+    >
+      <View
+        style={{
+          width: '50%',
+          height: '100%',
+          backgroundColor: '#ff1687',
+          justifyContent: 'center',
+          paddingLeft: 28,
+        }}
+      >
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 24,
+            fontWeight: '900',
+          }}
+        >
+          125,600
+        </Text>
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          left: '50%',
+          marginLeft: -15,
+          width: 30,
+          height: 52,
+          backgroundColor: '#ff1687',
+          transform: [{ skewX: '-18deg' }],
+        }}
+      />
+
+      <View
+        style={{
+          width: '50%',
+          height: '100%',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          paddingRight: 28,
+        }}
+      >
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 24,
+            fontWeight: '900',
+          }}
+        >
+          98,400
+        </Text>
+      </View>
+    </View>
+
+    {/* =========================
+        MAIN PK BATTLE AREA
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: '16.75%',
+        height: '43.1%',
+        flexDirection: 'row',
+        zIndex: 10,
+        elevation: 10,
+      }}
+    >
+
+      {/* HOST SIDE */}
+      <View
+        style={{
+          width: '50%',
+          height: '100%',
+          overflow: 'hidden',
+          backgroundColor: '#151116',
+          borderTopRightRadius: 14,
+          borderBottomRightRadius: 14,
+          borderTopWidth: 2,
+          borderRightWidth: 2,
+          borderBottomWidth: 2,
+          borderColor: '#ff1687',
+        }}
+      >
+        {multiHostTrack ? (
+          <VideoTrack
+            trackRef={multiHostTrack}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#241822',
+            }}
+          >
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: '800',
+              }}
+            >
+              HOST CAMERA
+            </Text>
+          </View>
+        )}
+
+        {/* HOST NAME */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 14,
+            height: 42,
+            paddingHorizontal: 13,
+            borderRadius: 21,
+            backgroundColor: 'rgba(14,10,17,0.82)',
+            borderWidth: 1,
+            borderColor: '#ff1687',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 27,
+              height: 27,
+              borderRadius: 14,
+              backgroundColor: '#ff1687',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 7,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 15 }}>♟</Text>
+          </View>
+
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: '900',
+            }}
+          >
+            Host
+          </Text>
+        </View>
+
+        {/* HOST SUPPORTERS */}
+        <View
+          style={{
+            position: 'absolute',
+            left: 25,
+            bottom: 12,
+            flexDirection: 'row',
+          }}
+        >
+          {['👩🏻','👩🏼','👩🏽'].map((avatar, i) => (
+            <View
+              key={i}
+              style={{
+                width: 47,
+                height: 47,
+                borderRadius: 24,
+                backgroundColor: '#242028',
+                borderWidth: 2,
+                borderColor: '#ff3b9c',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: i === 0 ? 0 : -9,
+              }}
+            >
+              <Text style={{ fontSize: 24 }}>{avatar}</Text>
+
+              <View
+                style={{
+                  position: 'absolute',
+                  right: -3,
+                  bottom: -4,
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: '#ff1687',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 10,
+                    fontWeight: '900',
+                  }}
+                >
+                  {3 - i}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* OPPONENT SIDE */}
+      <View
+        style={{
+          width: '50%',
+          height: '100%',
+          overflow: 'hidden',
+          backgroundColor: '#0d1523',
+          borderTopLeftRadius: 14,
+          borderBottomLeftRadius: 14,
+          borderTopWidth: 2,
+          borderLeftWidth: 2,
+          borderBottomWidth: 2,
+          borderColor: '#148cff',
+        }}
+      >
+        {multiGuestTracks && multiGuestTracks[0] ? (
+          <VideoTrack
+            trackRef={multiGuestTracks[0]}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: '#101827',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <View
+              style={{
+                width: 88,
+                height: 88,
+                borderRadius: 44,
+                backgroundColor: 'rgba(45,130,240,0.16)',
+                borderWidth: 1,
+                borderColor: 'rgba(80,160,255,0.30)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 42 }}>👤</Text>
+            </View>
+
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: '800',
+                marginTop: 12,
+              }}
+            >
+              Waiting for opponent
+            </Text>
+          </View>
+        )}
+
+        {/* OPPONENT NAME */}
+        <View
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 14,
+            height: 42,
+            paddingHorizontal: 13,
+            borderRadius: 21,
+            backgroundColor: 'rgba(8,13,23,0.82)',
+            borderWidth: 1,
+            borderColor: '#148cff',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 27,
+              height: 27,
+              borderRadius: 14,
+              backgroundColor: '#148cff',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 7,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 14 }}>2</Text>
+          </View>
+
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: '900',
+            }}
+          >
+            Liam
+          </Text>
+        </View>
+
+        {/* OPPONENT SUPPORTERS */}
+        <View
+          style={{
+            position: 'absolute',
+            right: 25,
+            bottom: 12,
+            flexDirection: 'row',
+          }}
+        >
+          {['👨🏻','👩🏻','👨🏼'].map((avatar, i) => (
+            <View
+              key={i}
+              style={{
+                width: 47,
+                height: 47,
+                borderRadius: 24,
+                backgroundColor: '#1c2430',
+                borderWidth: 2,
+                borderColor: '#1b9cff',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: i === 0 ? 0 : -9,
+              }}
+            >
+              <Text style={{ fontSize: 24 }}>{avatar}</Text>
+
+              <View
+                style={{
+                  position: 'absolute',
+                  right: -3,
+                  bottom: -4,
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: '#148cff',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 10,
+                    fontWeight: '900',
+                  }}
+                >
+                  {i + 1}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* CENTER PK TIMER */}
+      <View
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: 0,
+          marginLeft: -76,
+          width: 152,
+          height: 60,
+          borderBottomLeftRadius: 28,
+          borderBottomRightRadius: 28,
+          backgroundColor: '#08090f',
+          borderLeftWidth: 2,
+          borderRightWidth: 2,
+          borderBottomWidth: 2,
+          borderColor: '#ff1687',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 30,
+          elevation: 30,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 27,
+            fontWeight: '900',
+          }}
+        >
+          <Text style={{ color: '#ff1687', fontStyle: 'italic' }}>
+            PK
+          </Text>
+          <Text style={{ color: '#fff' }}>
+            {' '}04:23
+          </Text>
+        </Text>
+      </View>
+
+      {/* CENTER VS */}
+      <View
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          width: 92,
+          height: 92,
+          marginLeft: -46,
+          marginTop: -46,
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 40,
+          elevation: 40,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 72,
+            fontWeight: '900',
+            fontStyle: 'italic',
+            letterSpacing: -9,
+            includeFontPadding: false,
+            textShadowOffset: { width: 0, height: 4 },
+            textShadowRadius: 12,
+            textShadowColor: '#ff1687',
+          }}
+        >
+          <Text style={{ color: '#ff4ba8' }}>V</Text>
+          <Text
+            style={{
+              color: '#55a4ff',
+              textShadowColor: '#147fff',
+            }}
+          >
+            S
+          </Text>
+        </Text>
+      </View>
+    </View>
+
+    {/* =========================
+        BATTLE FEED
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        left: 18,
+        right: 78,
+        bottom: 104,
+        zIndex: 20,
+        elevation: 20,
+      }}
+    >
+      {[
+        ['👨🏻', 'James', 'sent Rose', '🌹', 'x 10'],
+        ['👨🏼', 'Sophia', 'sent TikTok', '🎵', 'x 5'],
+        ['👨🏻', 'Daniel', 'Amazing battle!', '🔥', ''],
+        ['👩🏻', 'Emma', 'Team Anna!', '❤️', ''],
+        ['👨🏻', 'Ryan', 'Team Liam!', '💙', ''],
+        ['👩🏼', 'Isabella', 'This is intense!', '😍', ''],
+      ].map((row, i) => (
+        <View
+          key={i}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: i < 2 ? 49 : 43,
+          }}
+        >
+          <View
+            style={{
+              width: 39,
+              height: 39,
+              borderRadius: 20,
+              backgroundColor: '#27262d',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.20)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 21 }}>{row[0]}</Text>
+          </View>
+
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 15,
+              fontWeight: i < 2 ? '900' : '700',
+              marginLeft: 9,
+            }}
+          >
+            {row[1]}
+          </Text>
+
+          <Text
+            style={{
+              color: '#bcbac3',
+              fontSize: 14,
+              marginLeft: 12,
+            }}
+          >
+            {row[2]}
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 25,
+              marginLeft: 7,
+            }}
+          >
+            {row[3]}
+          </Text>
+
+          {row[4] ? (
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: '900',
+                marginLeft: 5,
+              }}
+            >
+              {row[4]}
+            </Text>
+          ) : null}
+        </View>
+      ))}
+    </View>
+
+    {/* =========================
+        RIGHT HEART STREAM
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        right: 14,
+        bottom: 112,
+        width: 48,
+        alignItems: 'center',
+        zIndex: 25,
+        elevation: 25,
+      }}
+    >
+      {['♥','♥','♥','♥','♥'].map((heart, i) => (
+        <Text
+          key={i}
+          style={{
+            color: i === 2 ? '#ff238d' : '#ff3c98',
+            fontSize: 38 - i * 2,
+            marginTop: i === 0 ? 0 : 4,
+            opacity: 1 - i * 0.08,
+          }}
+        >
+          {heart}
+        </Text>
+      ))}
+    </View>
+
+    {/* =========================
+        BOTTOM ACTION BAR
+       ========================= */}
+    <View
+      style={{
+        position: 'absolute',
+        left: 14,
+        right: 14,
+        bottom: 14,
+        height: 72,
+        flexDirection: 'row',
+        alignItems: 'center',
+        zIndex: 50,
+        elevation: 50,
+      }}
+    >
+
+      {/* SUBSCRIBE */}
+      <Pressable
+        style={{
+          width: 72,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ fontSize: 31 }}>⭐</Text>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: '700',
+            marginTop: 2,
+          }}
+        >
+          Subscribe
+        </Text>
+      </Pressable>
+
+      {/* COMMENT */}
+      <View
+        style={{
+          flex: 1,
+          height: 58,
+          borderRadius: 29,
+          backgroundColor: 'rgba(31,31,38,0.96)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.10)',
+          justifyContent: 'center',
+          paddingHorizontal: 22,
+          marginHorizontal: 8,
+        }}
+      >
+        <Text
+          style={{
+            color: '#9b9aa3',
+            fontSize: 17,
+          }}
+        >
+          Comment...
+        </Text>
+      </View>
+
+      {/* ROSE */}
+      <Pressable
+        onPress={() => setGiftOpen(true)}
+        style={{
+          width: 62,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ fontSize: 30 }}>🌹</Text>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: '700',
+            marginTop: 2,
+          }}
+        >
+          Rose
+        </Text>
+      </Pressable>
+
+      {/* GIFT */}
+      <Pressable
+        onPress={() => setGiftOpen(true)}
+        style={{
+          width: 62,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ fontSize: 30 }}>🎁</Text>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: '700',
+            marginTop: 2,
+          }}
+        >
+          Gift
+        </Text>
+      </Pressable>
+
+      {/* SHARE */}
+      <Pressable
+        style={{
+          width: 62,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 32,
+            lineHeight: 32,
+          }}
+        >
+          ↗
+        </Text>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: '700',
+            marginTop: 2,
+          }}
+        >
+          Share
+        </Text>
+      </Pressable>
+
+      {/* MORE */}
+      <Pressable
+        onPress={() => setMoreOpen(true)}
+        style={{
+          width: 62,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 31,
+            lineHeight: 28,
+            fontWeight: '900',
+            letterSpacing: 2,
+          }}
+        >
+          •••
+        </Text>
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: '700',
+            marginTop: 4,
+          }}
+        >
+          More
+        </Text>
+      </Pressable>
+    </View>
+
+  </View>
+)}
+
+{activeGift && (
   <Animated.View
     pointerEvents="none"
     style={[styles.giftOverlay, { opacity: giftOpacity }]}
@@ -511,16 +2019,7 @@ hostBadgeText:{
   color:'#fff',
   fontSize:10,
   fontWeight:'900'
-},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},topLiveBar:{position:'absolute',top:16,left:14,right:14,height:58,borderRadius:29,backgroundColor:'rgba(12,12,18,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',flexDirection:'row',alignItems:'center',paddingHorizontal:8,zIndex:10},
-topLiveAvatar:{width:42,height:42,borderRadius:21,backgroundColor:'#252532',alignItems:'center',justifyContent:'center'},
-topLiveAvatarText:{color:'#fff',fontSize:16,fontWeight:'800'},
-topLiveInfo:{flex:1,marginLeft:10},
-topLiveName:{color:'#fff',fontSize:13,fontWeight:'800'},
-topLiveStatus:{color:'#aaa',fontSize:10,fontWeight:'600',marginTop:2},
-topLiveBadge:{height:32,paddingHorizontal:12,borderRadius:16,backgroundColor:'rgba(255,45,114,0.18)',borderWidth:1,borderColor:'rgba(255,45,114,0.45)',flexDirection:'row',alignItems:'center',gap:6},
-topLiveDot:{width:7,height:7,borderRadius:4,backgroundColor:'#ff2d72'},
-topLiveBadgeText:{color:'#fff',fontSize:10,fontWeight:'900'},
-controls:{position:'absolute',bottom:18,left:14,right:14,flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center'},control:{minWidth:72,height:44,paddingHorizontal:12,borderRadius:22,backgroundColor:'rgba(15,15,22,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7},controlIcon:{fontSize:17,color:'#fff',lineHeight:20},controlLabel:{color:'#fff',fontSize:12,fontWeight:'700'},
+},video:{width:'100%',height:'100%'},label:{position:'absolute',left:6,bottom:6,paddingHorizontal:7,paddingVertical:4,borderRadius:10,backgroundColor:'#000b'},labelText:{color:'#fff',fontSize:10,fontWeight:'700'},empty:{alignItems:'center',justifyContent:'center'},emptyText:{color:'#777'},controls:{position:'absolute',bottom:18,left:14,right:14,flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center'},control:{minWidth:72,height:44,paddingHorizontal:12,borderRadius:22,backgroundColor:'rgba(15,15,22,0.72)',borderWidth:1,borderColor:'rgba(255,255,255,0.14)',alignItems:'center',justifyContent:'center',flexDirection:'row',gap:7},controlIcon:{fontSize:17,color:'#fff',lineHeight:20},controlLabel:{color:'#fff',fontSize:12,fontWeight:'700'},
 giftControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(255,45,114,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endControl:{width:56,height:56,borderRadius:28,backgroundColor:'rgba(220,45,65,0.9)',borderWidth:1,borderColor:'rgba(255,255,255,0.18)',alignItems:'center',justifyContent:'center'},endIcon:{color:'#fff',fontSize:18,fontWeight:'900'},endLabel:{color:'#fff',fontSize:9,fontWeight:'800',marginTop:1},
 giftControlIcon:{fontSize:18},
 giftControlText:{color:'#fff',fontWeight:'800',fontSize:10,marginTop:1},
